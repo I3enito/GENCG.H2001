@@ -20,6 +20,8 @@
         import * as THREE from 'https://unpkg.com/three@0.120.1/build/three.module.js';
 
         // Our Javascript will go here.
+        var newPoint = 0;
+
         var renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
@@ -47,6 +49,17 @@
         function animate() {
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
+
+            newPoint += 0.1
+
+
+            var newPoints = [];
+            newPoints.push(new THREE.Vector3(- 10, 0, 0));
+            newPoints.push(new THREE.Vector3(0, Math.sin(newPoint) * 5, 0));
+            newPoints.push(new THREE.Vector3(10, 0, 0));
+
+            line.geometry = new THREE.BufferGeometry().setFromPoints(newPoints);
+            line.geometry.attributes.position.needsUpdate = true;
 
 
         }
