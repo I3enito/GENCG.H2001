@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>My first three.js app</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.120.1/build/three.module.js';
+
+        // Our Javascript will go here.
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        var newValue = 0;
+
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+        camera.position.set(0, 0, 100);
+        camera.lookAt(0, 0, 0);
+
+        var scene = new THREE.Scene();
+
+        var MAX_POINTS = 500;
+
+        // geometry
+        var geometry = new THREE.BufferGeometry();
+
+        // attributes
+        var positions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        // draw range
+        var drawCount = 2; // draw the first 2 points, only
+        geometry.setDrawRange(0, drawCount);
+
+        // material
+        var material = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+
+        // line
+        var line = new THREE.Line(geometry, material);
+        scene.add(line);
+        renderer.render(scene, camera);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+
+            var positions = line.geometry.attributes.position.array;
+
+            var x, y, z, index;
+            x = y = z = index = 0;
+
+            for (var i = 0, l = MAX_POINTS; i < l; i++) {
+
+                positions[index++] = x;
+                positions[index++] = y;
+                positions[index++] = z;
+
+                x += (Math.random() - 0.5) * 30;
+                y += (Math.random() - 0.5) * 30;
+                z += (Math.random() - 0.5) * 30;
+
+            }
+
+            line.geometry.setDrawRange(0, newValue++);
+            line.geometry.attributes.position.needsUpdate = true;
+
+
+        }
+        animate();
+
+    </script>
+</body>
+
+</html>
