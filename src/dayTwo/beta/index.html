@@ -59,6 +59,7 @@
             camera.position.z = 400;
 
             scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xccc5ca);
             scene.fog = new THREE.Fog(0xccc5ca, 10, 1000);
 
             object = new THREE.Object3D();
@@ -69,7 +70,7 @@
             controls.movementSpeed = 1000;
             controls.lookSpeed = 0.1;
 
-            var geometry = new THREE.SphereBufferGeometry(1, 100, 100);
+            var geometry = new THREE.SphereBufferGeometry(1, 4, 4);
 
             for (var i = 0; i < 1000; i++) {
 
@@ -96,7 +97,7 @@
             composer.addPass(new RenderPass(scene, camera));
 
             glitchPass = new GlitchPass();
-            // composer.addPass(glitchPass);
+            composer.addPass(glitchPass);
 
 
             //
