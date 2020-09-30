@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>My first three.js app</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.120.1/build/three.module.js';
+        import { EffectComposer } from 'https://unpkg.com/three@0.120.1/examples/jsm/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'https://unpkg.com/three@0.120.1/examples/jsm/postprocessing/RenderPass.js';
+        import { GlitchPass } from 'https://unpkg.com/three@0.120.1/examples/jsm/postprocessing/GlitchPass.js';
+        import { OrbitControls } from 'https://unpkg.com/three@0.120.1/examples/jsm/controls/OrbitControls.js';
+
+        // Our Javascript will go here.
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        var controls = new OrbitControls(camera, renderer.domElement);
+        var geometry = new THREE.Geometry();
+
+        var geometry = new THREE.BufferGeometry();
+        // create a simple square shape. We duplicate the top left and bottom right
+        // vertices because each vertex needs to appear once per triangle.
+
+        const center = [0, 0, 0]
+
+        let verticesArray = [];
+
+        const interationStep = 1 / 12 * Math.PI;
+
+        for (let i = 0; i <= 2 * Math.PI; i += interationStep) {
+            console.log(i)
+            const pointOne = [Math.cos(i), Math.sin(i), 0.0]
+            const pointTwo = [Math.cos(interationStep + i), Math.sin(interationStep + i), 0.0]
+            verticesArray.push(...center, ...pointOne, ...pointTwo)
+
+        }
+
+        console.log(verticesArray);
+        var vertices = new Float32Array(verticesArray);
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+        var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        var mesh = new THREE.Mesh(geometry, material);
+
+
+        var mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        camera.position.z = 5;
+
+        controls.update();
+
+        function animate() {
+            controls.update();
+            renderer.render(scene, camera);
+
+
+
+            // cube.rotation.x += 0.01;
+            // cube.rotation.y += 0.01;
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+
+</html>
