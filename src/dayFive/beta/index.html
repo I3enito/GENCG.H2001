@@ -47,12 +47,16 @@
             camera.add(pointLight);
             scene.add(camera);
 
+            var directionalLight = new THREE.DirectionalLight(0xffffff);
+            directionalLight.position.set(100, 1, 1);
+            scene.add(directionalLight);
+
             // var map = new THREE.TextureLoader().load('../../textures/uv_grid_opengl.jpg');
             // map.wrapS = map.wrapT = THREE.RepeatWrapping;
             // map.anisotropy = 16;
 
-            // var material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-            var material = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
+            var material = new THREE.MeshPhongMaterial({ color: 0x2194ce, flatShading: true, side: THREE.DoubleSide, visible: true })
+            // var material = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
 
             //
             const center = [0, 0, 0]
@@ -67,18 +71,24 @@
 
             // }
 
+
+
             for (let z = 0; z <= 10; z += zIterationIndex) {
 
+                for (let i = 0; i <= 2 * Math.PI; i += circleStep) {
+                    const pointOne = [Math.cos(i), Math.sin(i), z]
+                    const pointTwo = [Math.cos(i), Math.sin(i), z + zIterationIndex,]
+                    const pointThree = [Math.cos(circleStep + i), Math.sin(circleStep + i), z]
 
+                    const pointFour = [Math.cos(circleStep + i), Math.sin(circleStep + i), z]
+                    const pointFive = [Math.cos(circleStep + i), Math.sin(circleStep + i), z + zIterationIndex]
+                    const pointSix = [Math.cos(i), Math.sin(i), z + zIterationIndex]
+
+                    points.push(...pointOne, ...pointTwo, ...pointThree, ...pointFour, ...pointFive, ...pointSix)
+
+                }
                 console.log(z)
-                const pointOne = [z, 0.0, 0.0]
-                const pointTwo = [z + zIterationIndex, 0.0, 0.0]
-                const pointThree = [z, 1.0, 0.0]
 
-                const pointFour = [z, 1.0, 0.0]
-                const pointFive = [z + zIterationIndex, 1.0, 0.0]
-                const pointSix = [z + zIterationIndex, 0.0, 0.0]
-                points.push(...pointOne, ...pointTwo, ...pointThree, ...pointFour, ...pointFive, ...pointSix)
 
 
             }
