@@ -51,6 +51,14 @@
             directionalLight.position.set(100, 1, 1);
             scene.add(directionalLight);
 
+            var dir = new THREE.Vector3(1, 2, 0);
+
+            //normalize the direction vector (convert to vector of length 1)
+            dir.normalize();
+
+
+
+
             // var map = new THREE.TextureLoader().load('../../textures/uv_grid_opengl.jpg');
             // map.wrapS = map.wrapT = THREE.RepeatWrapping;
             // map.anisotropy = 16;
@@ -65,29 +73,60 @@
             const zIterationIndex = 1;
             const circleStep = 1 / 6 * Math.PI;
 
+            var origin = new THREE.Vector3(0, 0, 0);
+            const xVector = new THREE.Vector3(1, 0, 0);
+            const yVector = new THREE.Vector3(0, 1, 0);
+            const zVector = new THREE.Vector3(0, 0, 1);
+
+            let directionVector = new THREE.Vector3(0, 1, 1).normalize();
+
+            var length = 1;
+            var red = 0xff0000;
+            var green = 0x00ff00;
+            var blue = 0x0000ff;
+
+            var xCoordinate = new THREE.ArrowHelper(xVector, origin, length, red);
+            var yCoordinate = new THREE.ArrowHelper(yVector, origin, length, green);
+            var zCoordinate = new THREE.ArrowHelper(zVector, origin, length, blue);
+            scene.add(xCoordinate, yCoordinate, zCoordinate);
+
+
+
             // for (var i = 0; i < 50; i++) {
 
             //     points.push(new THREE.Vector2(Math.sin(i * 0.2) * Math.sin(i * 0.1) * 15 + 50, (i - 5) * 2));
 
             // }
 
+            let xOffset = 0;
+            let yOffset = 0;
+            let zOffset = 0;
 
 
-            for (let z = 0; z <= 10; z += zIterationIndex) {
+            for (let i = 0; i <= 10; i += 1) {
 
-                for (let i = 0; i <= 2 * Math.PI; i += circleStep) {
-                    const pointOne = [Math.cos(i), Math.sin(i), z]
-                    const pointTwo = [Math.cos(i), Math.sin(i), z + zIterationIndex,]
-                    const pointThree = [Math.cos(circleStep + i), Math.sin(circleStep + i), z]
+                xOffset += directionVector.clone().projectOnVector(xVector).length()
+                yOffset += directionVector.clone().projectOnVector(yVector).length()
+                zOffset += directionVector.clone().projectOnVector(zVector).length()
 
-                    const pointFour = [Math.cos(circleStep + i), Math.sin(circleStep + i), z]
-                    const pointFive = [Math.cos(circleStep + i), Math.sin(circleStep + i), z + zIterationIndex]
-                    const pointSix = [Math.cos(i), Math.sin(i), z + zIterationIndex]
+                const xAngle = directionVector.clone().angleTo(xVector)
+                const yAngle = directionVector.clone().angleTo(yVector)
+                const zAngle = directionVector.clone().angleTo(zVector)
+
+                for (let j = 0; j <= 2 * Math.PI; j += circleStep) {
+                    const pointOne = [xOffset + Math.cos(j), yOffset + Math.sin(j), zOffset  + Math.cos(zAngle)]
+                    const pointTwo = [xOffset + Math.cos(j), yOffset + Math.sin(j), zOffset + zIterationIndex,]
+                    const pointThree = [xOffset + Math.cos(circleStep + j), yOffset + Math.sin(circleStep + j), zOffset]
+
+                    const pointFour = [xOffset + Math.cos(circleStep + j), yOffset + Math.sin(circleStep + j), zOffset]
+                    const pointFive = [xOffset + Math.cos(circleStep + j), yOffset + Math.sin(circleStep + j), zOffset + zIterationIndex]
+                    const pointSix = [xOffset + Math.cos(j), yOffset + Math.sin(j), zOffset + zIterationIndex]
 
                     points.push(...pointOne, ...pointTwo, ...pointThree, ...pointFour, ...pointFive, ...pointSix)
 
                 }
-                console.log(z)
+
+
 
 
 
