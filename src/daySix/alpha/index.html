@@ -30,11 +30,32 @@
 
         let camera, scene, renderer, stats;
         let percentage = 0;
-        let curve;
+        let curve, material;
         let pointLight;
+
+        let perlin;
+
+
+        const innerWidth = window.innerWidth;
+        const innerHeight = window.innerHeight;
+
+
+
+        let cursorX = 0, cursorY = 0;
 
         init();
         animate();
+
+        const handleMouseMove = (e) => {
+
+            cursorX = e.clientX / innerWidth;
+            cursorY = e.clientY / innerHeight;
+            console.log("x: " + cursorX + "; y: " + cursorY)
+
+        }
+
+        document.addEventListener('mousemove', handleMouseMove);
+
 
         function init() {
 
@@ -44,10 +65,10 @@
             scene = new THREE.Scene();
 
             // add lights
-            // let ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
-            // scene.add(ambientLight);
+            let ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
+            scene.add(ambientLight);
 
-            pointLight = new THREE.PointLight(0xffffff, 0.8, 200);
+            pointLight = new THREE.PointLight(0xffffff, 1, 1000, 2);
             camera.add(pointLight);
             scene.add(camera);
 
@@ -76,9 +97,9 @@
             let noiseArray = [];
 
 
-            var perlin = new ImprovedNoise();
+            perlin = new ImprovedNoise();
 
-            for (let i = 0; i <= 2 * Math.PI; i += 1 / 96 * Math.PI) {
+            for (let i = 0; i <= 2 * Math.PI + 1 / 128 * Math.PI; i += 1 / 128 * Math.PI) {
 
                 noiseArray.push(new THREE.Vector3(50 * perlin.noise(Math.cos(i + 1 / 4 * Math.PI), Math.sin(i + 1 / 4 * Math.PI), 0), 50 * perlin.noise(Math.sin(i), Math.cos(i), 0), 50 * Math.cos(i)))
 
@@ -95,7 +116,7 @@
             //5th param specify if we want the tube to be closed or not
             var geometry = new THREE.TubeGeometry(curve, 256, 1, 12, false);
             //Basic red material
-            var material = new THREE.MeshPhongMaterial({ color: 0x2194ce, flatShading: true, side: THREE.DoubleSide, visible: true, wireframe: false, vertexColors: false, alpha: 0.7 })
+            material = new THREE.MeshPhongMaterial({ color: 0x2194ce, flatShading: true, side: THREE.DoubleSide, visible: true, wireframe: false, vertexColors: false, alpha: 0.7 })
             //Create a mesh
             var tube = new THREE.Mesh(geometry, material);
             //Add tube into the scene
@@ -136,11 +157,17 @@
             percentage += 0.001;
 
             //Get the point at the specific percentage
+            const ligthOffset = (-0.5 + cursorY);
+
             var p1 = curve.getPointAt(percentage % 1);
             var p2 = curve.getPointAt((percentage + 0.01) % 1);
-            camera.position.set(p1.x, p1.y, p1.z);
-            camera.lookAt(p2);
-            pointLight.position.set(p2.x, p2.y, p2.z);
+            let lightPosition = curve.getPointAt((percentage + 1 + ligthOffset) % 1);
+            // camera.position.set(p1.x, p1.y, p1.z);
+            // camera.lookAt(p2);
+            pointLight.position.set(lightPosition.x, lightPosition.y, lightPosition.z);
+
+
+            material.color = new THREE.Color(perlin.noise(cursorX, 0, 0), (perlin.noise(0, cursorX, 0) + 0.633) % 1, (perlin.noise(0, 0, cursorX) + 0.633))
 
             requestAnimationFrame(animate);
 
