@@ -66,7 +66,7 @@
 
             // add lights
             let ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
-            scene.add(ambientLight);
+            // scene.add(ambientLight);
 
             pointLight = new THREE.PointLight(0xffffff, 1, 1000, 2);
             camera.add(pointLight);
@@ -162,8 +162,8 @@
             var p1 = curve.getPointAt(percentage % 1);
             var p2 = curve.getPointAt((percentage + 0.01) % 1);
             let lightPosition = curve.getPointAt((percentage + 1 + ligthOffset) % 1);
-            // camera.position.set(p1.x, p1.y, p1.z);
-            // camera.lookAt(p2);
+            camera.position.set(p1.x, p1.y, p1.z);
+            camera.lookAt(p2);
             pointLight.position.set(lightPosition.x, lightPosition.y, lightPosition.z);
 
 
