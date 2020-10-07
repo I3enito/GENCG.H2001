@@ -13,6 +13,7 @@
             display: block;
         }
     </style>
+    <!-- <script src="../../libs/noise.js"></script> -->
 </head>
 
 <body>
@@ -22,124 +23,104 @@
         import { RenderPass } from 'https://unpkg.com/three@0.120.1/examples/jsm/postprocessing/RenderPass.js';
         import { GlitchPass } from 'https://unpkg.com/three@0.120.1/examples/jsm/postprocessing/GlitchPass.js';
         import { OrbitControls } from 'https://unpkg.com/three@0.120.1/examples/jsm/controls/OrbitControls.js';
+        import { ImprovedNoise } from 'https://unpkg.com/three@0.120.1/examples/jsm/math/ImprovedNoise.js';
 
 
         import Stats from 'https://unpkg.com/three@0.120.1/examples/jsm/libs/stats.module.js';
 
-        var camera, scene, renderer, stats;
+        let camera, scene, renderer, stats;
+        let percentage = 0;
+        let curve, material;
+        let pointLight;
+
+        let perlin;
+
+
+        const innerWidth = window.innerWidth;
+        const innerHeight = window.innerHeight;
+
+
+
+        let cursorX = 0, cursorY = 0;
 
         init();
         animate();
 
+        const handleMouseMove = (e) => {
+
+            cursorX = e.clientX / innerWidth;
+            cursorY = e.clientY / innerHeight;
+            console.log("x: " + cursorX + "; y: " + cursorY)
+
+        }
+
+        document.addEventListener('mousemove', handleMouseMove);
+
+
         function init() {
 
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.z = 10;
 
             scene = new THREE.Scene();
 
-            var object;
-
-            var ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
+            // add lights
+            let ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
             scene.add(ambientLight);
 
-            var pointLight = new THREE.PointLight(0xffffff, 0.8);
+            pointLight = new THREE.PointLight(0xffffff, 1, 1000, 2);
             camera.add(pointLight);
             scene.add(camera);
 
-            var directionalLight = new THREE.DirectionalLight(0xffffff);
-            directionalLight.position.set(100, 1, 1);
-            scene.add(directionalLight);
+            // let directionalLight = new THREE.DirectionalLight(0xffffff);
+            // directionalLight.position.set(100, 1, 1);
+            // scene.add(directionalLight);
 
-            var dir = new THREE.Vector3(1, 2, 0);
+            // show coordinate helpers
 
-            //normalize the direction vector (convert to vector of length 1)
-            dir.normalize();
-
-
-
-
-            // var map = new THREE.TextureLoader().load('../../textures/uv_grid_opengl.jpg');
-            // map.wrapS = map.wrapT = THREE.RepeatWrapping;
-            // map.anisotropy = 16;
-
-            var material = new THREE.MeshPhongMaterial({ color: 0x2194ce, flatShading: true, side: THREE.DoubleSide, visible: true })
-            // var material = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
-
-            //
-            const center = [0, 0, 0]
-            var points = [];
-
-            const zIterationIndex = 1;
-            const circleStep = 1 / 6 * Math.PI;
-
-            var origin = new THREE.Vector3(0, 0, 0);
+            let origin = new THREE.Vector3(0, 0, 0);
             const xVector = new THREE.Vector3(1, 0, 0);
             const yVector = new THREE.Vector3(0, 1, 0);
             const zVector = new THREE.Vector3(0, 0, 1);
 
-            let directionVector = new THREE.Vector3(0, 1, 1).normalize();
+            let length = 1;
+            let red = 0xff0000;
+            let green = 0x00ff00;
+            let blue = 0x0000ff;
 
-            var length = 1;
-            var red = 0xff0000;
-            var green = 0x00ff00;
-            var blue = 0x0000ff;
-
-            var xCoordinate = new THREE.ArrowHelper(xVector, origin, length, red);
-            var yCoordinate = new THREE.ArrowHelper(yVector, origin, length, green);
-            var zCoordinate = new THREE.ArrowHelper(zVector, origin, length, blue);
+            let xCoordinate = new THREE.ArrowHelper(xVector, origin, length, red);
+            let yCoordinate = new THREE.ArrowHelper(yVector, origin, length, green);
+            let zCoordinate = new THREE.ArrowHelper(zVector, origin, length, blue);
             scene.add(xCoordinate, yCoordinate, zCoordinate);
 
+            //Create a closed wavey loop
+            let noiseArray = [];
 
 
-            // for (var i = 0; i < 50; i++) {
+            perlin = new ImprovedNoise();
 
-            //     points.push(new THREE.Vector2(Math.sin(i * 0.2) * Math.sin(i * 0.1) * 15 + 50, (i - 5) * 2));
+            for (let i = 0; i <= 2 * Math.PI + 1 / 128 * Math.PI; i += 1 / 128 * Math.PI) {
 
-            // }
-
-            let xOffset = 0;
-            let yOffset = 0;
-            let zOffset = 0;
-
-
-            for (let i = 0; i <= 10; i += 1) {
-
-                xOffset += directionVector.clone().projectOnVector(xVector).length()
-                yOffset += directionVector.clone().projectOnVector(yVector).length()
-                zOffset += directionVector.clone().projectOnVector(zVector).length()
-
-                const xAngle = directionVector.clone().angleTo(xVector)
-                const yAngle = directionVector.clone().angleTo(yVector)
-                const zAngle = directionVector.clone().angleTo(zVector)
-
-                for (let j = 0; j <= 2 * Math.PI; j += circleStep) {
-                    const pointOne = [xOffset + Math.cos(j), yOffset + Math.sin(j), zOffset  + Math.cos(zAngle)]
-                    const pointTwo = [xOffset + Math.cos(j), yOffset + Math.sin(j), zOffset + zIterationIndex,]
-                    const pointThree = [xOffset + Math.cos(circleStep + j), yOffset + Math.sin(circleStep + j), zOffset]
-
-                    const pointFour = [xOffset + Math.cos(circleStep + j), yOffset + Math.sin(circleStep + j), zOffset]
-                    const pointFive = [xOffset + Math.cos(circleStep + j), yOffset + Math.sin(circleStep + j), zOffset + zIterationIndex]
-                    const pointSix = [xOffset + Math.cos(j), yOffset + Math.sin(j), zOffset + zIterationIndex]
-
-                    points.push(...pointOne, ...pointTwo, ...pointThree, ...pointFour, ...pointFive, ...pointSix)
-
-                }
-
-
-
-
+                noiseArray.push(new THREE.Vector3(50 * perlin.noise(Math.cos(i + 1 / 4 * Math.PI), Math.sin(i + 1 / 4 * Math.PI), 0), 50 * perlin.noise(Math.sin(i), Math.cos(i), 0), 50 * Math.cos(i)))
 
             }
+            curve = new THREE.CatmullRomCurve3(noiseArray);
 
-            var vertices = new Float32Array(points);
+            // let points = curve.getPoints(50);
 
-            var geometry = new THREE.BufferGeometry();
-            geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-
-            object = new THREE.Mesh(geometry, material);
-            object.position.set(0, 0, 0);
-            scene.add(object);
+            //Create the tube geometry from the path
+            //1st param is the path
+            //2nd param is the amount of segments we want to make the tube
+            //3rd param is the radius of the tube
+            //4th param is the amount of segment along the radius
+            //5th param specify if we want the tube to be closed or not
+            var geometry = new THREE.TubeGeometry(curve, 256, 1, 12, false);
+            //Basic red material
+            material = new THREE.MeshPhongMaterial({ color: 0x2194ce, flatShading: true, side: THREE.DoubleSide, visible: true, wireframe: false, vertexColors: false, alpha: 0.7 })
+            //Create a mesh
+            var tube = new THREE.Mesh(geometry, material);
+            //Add tube into the scene
+            scene.add(tube);
 
             //
 
@@ -148,14 +129,14 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
+            var controls = new OrbitControls(camera, renderer.domElement);
+
             stats = new Stats();
             document.body.appendChild(stats.dom);
 
             //
 
             window.addEventListener('resize', onWindowResize, false);
-
-            var controls = new OrbitControls(camera, renderer.domElement);
 
         }
 
@@ -172,6 +153,22 @@
 
         function animate() {
 
+            //Increase the percentage
+            percentage += 0.001;
+
+            //Get the point at the specific percentage
+            const ligthOffset = (-0.5 + cursorY);
+
+            var p1 = curve.getPointAt(percentage % 1);
+            var p2 = curve.getPointAt((percentage + 0.01) % 1);
+            let lightPosition = curve.getPointAt((percentage + 1 + ligthOffset) % 1);
+            camera.position.set(p1.x, p1.y, p1.z);
+            camera.lookAt(p2);
+            pointLight.position.set(lightPosition.x, lightPosition.y, lightPosition.z);
+
+
+            material.color = new THREE.Color(perlin.noise(cursorX, 0, 0), (perlin.noise(0, cursorX, 0) + 0.633) % 1, (perlin.noise(0, 0, cursorX) + 0.633))
+
             requestAnimationFrame(animate);
 
             render();
@@ -179,25 +176,14 @@
 
         }
 
+
+
+
+
         function render() {
 
-            var timer = Date.now() * 0.0001;
 
-            // camera.position.x = Math.cos(timer) * 800;
-            // camera.position.z = Math.sin(timer) * 800;
-
-            camera.lookAt(scene.position);
-
-            // scene.traverse(function (object) {
-
-            //     if (object.isMesh === true) {
-
-            //         // object.rotation.x = timer * 5;
-            //         // object.rotation.y = timer * 2.5;
-
-            //     }
-
-            // });
+            let timer = Date.now() * 0.0001;
 
             renderer.render(scene, camera);
 
