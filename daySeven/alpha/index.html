@@ -134,19 +134,6 @@
             stats = new Stats();
             document.body.appendChild(stats.dom);
 
-            tube.geometry.verticesNeedUpdate = true;
-            tube.geometry.elementsNeedUpdate = true;
-            tube.geometry.morphTargetsNeedUpdate = true;
-            tube.geometry.uvsNeedUpdate = true;
-            tube.geometry.normalsNeedUpdate = true;
-            tube.geometry.colorsNeedUpdate = true;
-            tube.geometry.tangentsNeedUpdate = true;
-            tube.geometry.dynamic = true;
-            tube.geometry.needsUpdate = true;
-
-            curve.verticesNeedUpdate = true;
-
-            //
 
             window.addEventListener('resize', onWindowResize, false);
 
@@ -195,19 +182,6 @@
 
             const newGeometry = new THREE.TubeBufferGeometry(newCurve, 256, 1, 12, false);
             tube.geometry.copy(newGeometry);
-
-            tube.geometry.verticesNeedUpdate = true;
-            tube.geometry.elementsNeedUpdate = true;
-            tube.geometry.morphTargetsNeedUpdate = true;
-            tube.geometry.uvsNeedUpdate = true;
-            tube.geometry.normalsNeedUpdate = true;
-            tube.geometry.colorsNeedUpdate = true;
-            tube.geometry.tangentsNeedUpdate = true;
-            tube.geometry.dynamic = true;
-            tube.geometry.needsUpdate = true;
-            // tube.geometry.attributes.position.needsUpdate = true;
-
-            curve.verticesNeedUpdate = true;
 
             requestAnimationFrame(animate);
 

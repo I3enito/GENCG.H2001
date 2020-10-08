@@ -32,8 +32,11 @@
         let percentage = 0;
         let curve, material, geometry, tube;
         let pointLight;
+        let counter = 0;
+        let circleOffset = 0;
 
         let perlin;
+        let clock = new THREE.Clock();
 
 
         const innerWidth = window.innerWidth;
@@ -134,20 +137,6 @@
             stats = new Stats();
             document.body.appendChild(stats.dom);
 
-            tube.geometry.verticesNeedUpdate = true;
-            tube.geometry.elementsNeedUpdate = true;
-            tube.geometry.morphTargetsNeedUpdate = true;
-            tube.geometry.uvsNeedUpdate = true;
-            tube.geometry.normalsNeedUpdate = true;
-            tube.geometry.colorsNeedUpdate = true;
-            tube.geometry.tangentsNeedUpdate = true;
-            tube.geometry.dynamic = true;
-            tube.geometry.needsUpdate = true;
-
-            curve.verticesNeedUpdate = true;
-
-            //
-
             window.addEventListener('resize', onWindowResize, false);
 
         }
@@ -164,7 +153,9 @@
         //
 
         function animate() {
-
+            let delta = clock.getDelta();
+            counter = (counter + 1) % 20;
+            console.log(counter)
 
 
             //Increase the percentage
@@ -184,30 +175,34 @@
             material.color = new THREE.Color(perlin.noise(cursorX, 0, 0), (perlin.noise(0, cursorX, 0) + 0.633) % 1, (perlin.noise(0, 0, cursorX) + 0.633))
 
 
-            const newPoints = curve.points.map((vector, index) => {
-                const scalar = 0.5 + Math.random();
+            if (counter === 0) {
+                const newPoints = curve.points.map((vector, index) => {
+                    const scalar = 0.5 + Math.random();
 
-                return vector.clone().multiplyScalar(scalar);
-            })
+                    return vector.clone().multiplyScalar(scalar);
+                })
 
-            const newCurve = new THREE.CatmullRomCurve3(newPoints);
+                const vectorArray = [];
+                const offsetStep = 1 / 128;
+
+                for (let i = circleOffset; i <= 2 * Math.PI + offsetStep * Math.PI + circleOffset; i += offsetStep * Math.PI) {
+
+                    const x = perlin.noise(circleOffset, 0, 0) * 100 * perlin.noise(Math.cos(i + 1 / 4 * Math.PI), Math.sin(i + 1 / 4 * Math.PI), 0);
+                    const y = perlin.noise(circleOffset, 0, 0) * 100 * perlin.noise(Math.sin(i), Math.cos(i), 0);
+                    const z = 50 * Math.cos(i);
+
+                    vectorArray.push(new THREE.Vector3(x, y, z))
+
+                }
+                circleOffset = (circleOffset + offsetStep) % 2 * Math.PI;
+
+                const newCurve = new THREE.CatmullRomCurve3(vectorArray);
 
 
-            const newGeometry = new THREE.TubeBufferGeometry(newCurve, 256, 1, 12, false);
-            tube.geometry.copy(newGeometry);
+                const newGeometry = new THREE.TubeBufferGeometry(newCurve, 256, 1, 12, false);
+                tube.geometry.copy(newGeometry);
 
-            tube.geometry.verticesNeedUpdate = true;
-            tube.geometry.elementsNeedUpdate = true;
-            tube.geometry.morphTargetsNeedUpdate = true;
-            tube.geometry.uvsNeedUpdate = true;
-            tube.geometry.normalsNeedUpdate = true;
-            tube.geometry.colorsNeedUpdate = true;
-            tube.geometry.tangentsNeedUpdate = true;
-            tube.geometry.dynamic = true;
-            tube.geometry.needsUpdate = true;
-            // tube.geometry.attributes.position.needsUpdate = true;
-
-            curve.verticesNeedUpdate = true;
+            }
 
             requestAnimationFrame(animate);
 
