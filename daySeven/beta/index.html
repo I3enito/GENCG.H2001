@@ -176,12 +176,6 @@
 
 
             if (counter === 0) {
-                const newPoints = curve.points.map((vector, index) => {
-                    const scalar = 0.5 + Math.random();
-
-                    return vector.clone().multiplyScalar(scalar);
-                })
-
                 const vectorArray = [];
                 const offsetStep = 1 / 128;
 
